@@ -1,0 +1,46 @@
+schema_version: 1
+tsa_code: "29mini"
+
+metadata:
+  source_tsr:
+    - title: "Williams Lake TSA TSR Data Package"
+      year: 2024
+      url: "reference/29ts_dpkg_2024-2.pdf"
+      notes: "Section 8.5 TIPSY inputs: planting density, tree improvement, planting delay."
+  author: "codex-provisional"
+  created_utc: "2026-07-23T00:00:00Z"
+  notes: "Provisional TIPSY config for 100,000 ha square subset instance. Final calibration should be RESULTS/SPAR opening-level."
+
+species_code_overrides:
+  SX: SW
+  DR: FD
+
+siteprod_si_fallback_by_species:
+  DR: 14.0
+
+defaults:
+  e:
+    OAF2: 0.95
+    FIZ: "I"
+    Regen_Method: "P"
+    Proportion: 1
+    SPP_2: null
+    SPP_3: null
+    SPP_4: null
+    SPP_5: null
+    PCT_2: null
+    PCT_3: null
+    PCT_4: null
+    PCT_5: null
+    GW_1: null
+    GW_2: null
+    GW_3: null
+    GW_4: null
+    GW_5: null
+    GW_age_1: null
+    GW_age_2: null
+    GW_age_3: null
+    GW_age_4: null
+    GW_age_5: null
+  f:
+    SI_c1: 1.0
