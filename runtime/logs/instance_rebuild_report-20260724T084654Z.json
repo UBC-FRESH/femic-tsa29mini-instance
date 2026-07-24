@@ -1,0 +1,77 @@
+{
+  "run_id": "20260724T084654Z",
+  "started_at_utc": "2026-07-24T08:46:54Z",
+  "finished_at_utc": "2026-07-24T08:46:55Z",
+  "failed": true,
+  "planned_order": [
+    "validate_case",
+    "geospatial_preflight",
+    "compile_upstream",
+    "post_tipsy_bundle"
+  ],
+  "outcomes": [
+    {
+      "step_id": "validate_case",
+      "status": "failed",
+      "started_at_utc": "2026-07-24T08:46:54Z",
+      "finished_at_utc": "2026-07-24T08:46:55Z",
+      "duration_seconds": 0.023244,
+      "metadata": {},
+      "error": "Exit: "
+    }
+  ],
+  "artifact_references": {
+    "run_manifests": [],
+    "patchworks_manifests": [],
+    "patchworks_logs": [],
+    "rebuild_reports": [
+      "C:\\Users\\gep\\Projects\\femic\\external\\femic-tsa29mini-instance\\runtime\\logs\\instance_rebuild_report-20260724T084654Z.json"
+    ]
+  },
+  "metrics": {
+    "block_join_mismatch_count": null,
+    "topology_edge_count": null
+  },
+  "invariant_results": [
+    {
+      "invariant_id": "accounts_targets_presence",
+      "severity": "fatal",
+      "metric": "accounts.targets.required_present",
+      "comparator": "eq",
+      "target": true,
+      "measured": null,
+      "status": "fail",
+      "remediation": "Re-run matrix build and inspect accounts.csv/protoaccounts.csv.",
+      "message": "metric not found"
+    },
+    {
+      "invariant_id": "managed_area_sanity",
+      "severity": "fatal",
+      "metric": "managed_area_ha",
+      "comparator": "gt",
+      "target": 0,
+      "measured": null,
+      "status": "fail",
+      "remediation": "Check IFM assignment logic and source checkpoint inputs.",
+      "message": "metric not found"
+    },
+    {
+      "invariant_id": "block_join_consistency",
+      "severity": "fatal",
+      "metric": "block_join_mismatch_count",
+      "comparator": "eq",
+      "target": 0,
+      "measured": null,
+      "status": "fail",
+      "remediation": "Rebuild blocks.shp and verify BLOCK join keys.",
+      "message": "metric not found"
+    }
+  ],
+  "regression_gate": {
+    "baseline_unexpected_diff_count": 0,
+    "baseline_unexpected_diff_threshold": 0,
+    "unexpected_diff_regression": false,
+    "fatal_invariant_failure": true,
+    "step_failure": true
+  }
+}

@@ -46,7 +46,7 @@ defaults:
     SI_c1: 1.0
 
 rules:
-  - rule_id: "default_rule"
+  - id: "default_rule"
     description: "Default planting rule for TSA29mini"
     species: "*"
     regen_method: "P"

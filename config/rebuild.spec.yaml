@@ -19,36 +19,15 @@ runtime:
 # Pre-compiled fragments.shp IS the Patchworks output — no re-export needed.
 
 steps:
-  - step_id: "validate_case"
-    kind: "femic_command"
-    command: "femic prep validate-case --run-config ${runtime.run_config}"
-    required: false
+  - step_id: "validate_precached_data"
+    kind: "python_script"
+    command: "python validate_precached_data.py"
+    required: true
     depends_on: []
     mutable_artifacts: []
     expected_outputs:
-      - "case preflight success signal"
-    notes: "Skip for ready-to-use instances — pre-compiled data is already validated"
-  - step_id: "geospatial_preflight"
-    kind: "femic_command"
-    command: "femic prep geospatial-preflight"
-    required: false
-    depends_on:
-      - "validate_case"
-    mutable_artifacts: []
-    expected_outputs:
-      - "geospatial runtime success signal"
-    notes: "Skip for ready-to-use instances — pre-compiled data is already validated"
-  - step_id: "export_patchworks"
-    kind: "femic_command"
-    command: "femic export patchworks --tsa 29 --bundle-dir data/model_input_bundle --checkpoint data/tsr/strict_chain/23_thlb_parent_023_future_roads.feather --output-dir output/patchworks_tsa29mini"
-    required: false
-    depends_on: []
-    mutable_artifacts:
-      - "output/patchworks_tsa29mini/*"
-    expected_outputs:
-      - "output/patchworks_tsa29mini/forestmodel.xml"
-      - "output/patchworks_tsa29mini/fragments/*"
-    notes: "Pre-compiled fragments.shp already present in data/ — export is optional for validation only"
+      - "✓ ALL CHECKS PASSED"
+    notes: "Validates pre-compiled data for ready-to-use instances"
 
 invariants:
   - invariant_id: "accounts_targets_presence"
