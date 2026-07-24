@@ -15,5 +15,11 @@ modes:
   debug_rows: null
 
 run:
-  run_id: "tsa29mini_20260723"
-  log_dir: "vdyp_io/profile_logs"
+  run_id: "tsa29mini_20260724"
+  log_dir: "runtime/logs"
+
+# Notes:
+# This instance is a spatial subset of the full TSA29 model.
+# Stage 00 (VRI prep) and Stage 01 (VDYP/TIPSY growth) are skipped —
+# the compiled yield curves and fragment geometry are already present.
+# The model is ready for Patchworks export and scenario runs.

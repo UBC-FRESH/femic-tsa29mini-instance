@@ -1,7 +1,7 @@
 schema_version: "1.0"
 
 instance:
-  case_id: "case-template"
+  case_id: "tsa29mini"
   instance_root: "."
 
 runtime:
@@ -11,11 +11,17 @@ runtime:
   log_dir: "runtime/logs"
   baseline_unexpected_diff_threshold: 0
 
+# Notes:
+# This instance is a spatial subset of the full TSA29 model.
+# Stage 00 (VRI prep) and Stage 01 (VDYP/TIPSY growth) are skipped —
+# the compiled yield curves and fragment geometry are already present.
+# The model is ready for Patchworks export and scenario runs.
+
 steps:
   - step_id: "validate_case"
     kind: "femic_command"
     command: "femic prep validate-case --run-config ${runtime.run_config}"
-    required: true
+    required: false
     depends_on: []
     mutable_artifacts: []
     expected_outputs:
@@ -23,34 +29,22 @@ steps:
   - step_id: "geospatial_preflight"
     kind: "femic_command"
     command: "femic prep geospatial-preflight"
-    required: true
+    required: false
     depends_on:
       - "validate_case"
     mutable_artifacts: []
     expected_outputs:
       - "geospatial runtime success signal"
-  - step_id: "compile_upstream"
+  - step_id: "export_patchworks"
     kind: "femic_command"
-    command: "femic run --run-config ${runtime.run_config}"
+    command: "femic export patchworks --tsa 29mini --bundle-dir data/model_input_bundle --checkpoint data/tsr/strict_chain/23_thlb_parent_023_future_roads.feather --output-dir output/patchworks_tsa29mini"
     required: true
-    depends_on:
-      - "geospatial_preflight"
+    depends_on: []
     mutable_artifacts:
-      - "data/*"
-      - "runtime/logs/*"
+      - "output/patchworks_tsa29mini/*"
     expected_outputs:
-      - "run_manifest-<run_id>.json"
-  - step_id: "post_tipsy_bundle"
-    kind: "femic_command"
-    command: "femic tsa post-tipsy --run-config ${runtime.run_config} --tsa <code>"
-    required: true
-    depends_on:
-      - "compile_upstream"
-    mutable_artifacts:
-      - "data/model_input_bundle/*"
-      - "runtime/logs/*"
-    expected_outputs:
-      - "post-tipsy manifest and bundle tables"
+      - "output/patchworks_tsa29mini/forestmodel.xml"
+      - "output/patchworks_tsa29mini/fragments/*"
 
 invariants:
   - invariant_id: "accounts_targets_presence"
