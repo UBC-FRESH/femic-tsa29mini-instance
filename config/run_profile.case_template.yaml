@@ -1,0 +1,19 @@
+selection:
+  # Custom-boundary mode: 100,000 ha square subset centered on TSA29 centroid
+  boundary_path: "data/tsa_boundaries.gpkg"
+  boundary_layer: null
+  boundary_code: "29mini"
+
+  # Optional strata labels for targeted runs (informational in current flow).
+  strata: []
+
+modes:
+  resume: false
+  dry_run: false
+  verbose: true
+  skip_checks: false
+  debug_rows: null
+
+run:
+  run_id: "tsa29mini_20260723"
+  log_dir: "vdyp_io/profile_logs"
