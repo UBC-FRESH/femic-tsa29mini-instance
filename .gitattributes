@@ -1,3 +1,11 @@
 * annex.backend=MD5E
 **/.git* annex.largefiles=nothing
-* annex.largefiles=((mimeencoding=binary)and(largerthan=0))
+* annex.largefiles=((mimeencoding=binary)or(largerthan=1mb))
+*.md annex.largefiles=nothing
+*.rst annex.largefiles=nothing
+*.yaml annex.largefiles=nothing
+*.yml annex.largefiles=nothing
+*.json annex.largefiles=nothing
+*.sha256 annex.largefiles=nothing
+*.bsh annex.largefiles=nothing
+*.pin annex.largefiles=nothing

@@ -17,12 +17,20 @@ vdyp_io/scratch/
 data/downloads/
 data/bc/
 
-# Generated model outputs
-output/
+# Generated model outputs (curated exports are tracked; scratch is not)
 releases/
 plots/
 
-# Legacy intermediate artifacts
-data/*.feather
-data/*.pkl
-data/model_input_bundle/
+# Patchworks runtime spill
+runtime/logs/patchworks_matrixbuilder_stdout-*.log
+runtime/logs/patchworks_matrixbuilder_stderr-*.log
+runtime/logs/patchworks_headless_stdout-*.log
+runtime/logs/patchworks_headless_stderr-*.log
+models/*/patchworksLog.csv
+models/*/blocks/patchworksLog.csv
+tmp/
+
+# Editor/OS
+.DS_Store
+.vscode/
+.idea/
