@@ -1,0 +1,36 @@
+/*************************************************************
+ *
+ * Configure harvested-stem mean-QMD ratio accounts.
+ *
+ * - Numerator rows come from product.QMDNumerator.managed.*
+ * - Denominator rows come from product.Treated.managed.*
+ * - User-facing ratio rows are published as product.QMD.managed.*
+ *
+ *************************************************************/
+
+setupHarvestedQmdRatioAccounts(control, String tracksPathPrefix) {
+   TreeSet numeratorAccounts = _collectAccounts(
+      "product.QMDNumerator.managed.", tracksPathPrefix
+   );
+   TreeSet denominatorAccounts = _collectAccounts(
+      "product.Treated.managed.", tracksPathPrefix
+   );
+
+   int configured = 0;
+   for (Iterator it = numeratorAccounts.iterator(); it.hasNext();) {
+      String numerator = (String)it.next();
+      String suffix = numerator.substring("product.QMDNumerator.managed.".length());
+      String denominator = "product.Treated.managed."+suffix;
+      String ratio = "product.QMD.managed."+suffix;
+      if (!denominatorAccounts.contains(denominator)) {
+         throw new IllegalStateException(
+            "Missing harvested-QMD denominator account for "+numerator+
+            ": expected "+denominator
+         );
+      }
+      control.addRatioAccount(ratio, numerator, denominator, 1);
+      configured += 1;
+   }
+
+   print("Configured harvested QMD ratio accounts: "+configured);
+}

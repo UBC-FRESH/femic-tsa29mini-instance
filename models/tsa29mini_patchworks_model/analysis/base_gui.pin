@@ -1,0 +1,10 @@
+/*
+ * TSA29 interactive GUI Patchworks PIN wrapper.
+ *
+ * This wrapper uses the same shared baseline runtime body as `base.pin`, but
+ * exists as an explicit operator-facing launch surface for interactive
+ * development/testing sessions where headless mode is not requested.
+ */
+
+String tracks_path_prefix = "../tracks/";
+sourceRelative("base_variant_common.bsh");

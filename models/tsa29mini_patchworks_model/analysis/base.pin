@@ -1,0 +1,6 @@
+/*
+ * Base Patchworks PIN file wrapper.
+ */
+
+String tracks_path_prefix = "../tracks/";
+sourceRelative("base_variant_common.bsh");

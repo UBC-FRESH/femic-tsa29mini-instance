@@ -1,0 +1,288 @@
+/*
+ * Shared helpers for FEMIC-triggered no-GUI Patchworks runs.
+ *
+ * Contract:
+ *   args[0] = fully qualified PIN path (Patchworks standard)
+ *   args[1] = "__femic_headless__" sentinel
+ *   args[2] = reportWriter.saveStage(...) label/path
+ *   args[3] = iteration count
+ *   args[4] = objective improvement threshold
+ *   args[5] = trace log path
+ *   args[6] = optional scenario mode
+ *   args[7] = optional scenario target label
+ *   args[8] = optional scenario minimum annual value
+ */
+
+boolean femicHeadlessMode = false;
+String femicHeadlessStageLabel = "headless_runs/femic";
+int femicHeadlessIterations = 1;
+double femicHeadlessImprovement = 0.0d;
+String femicHeadlessTraceLogPath = null;
+String femicHeadlessScenarioMode = "none";
+String femicHeadlessScenarioTargetLabel = null;
+Double femicHeadlessScenarioMinAnnual = null;
+
+String femicThrowableToString(Throwable ex) {
+   java.io.StringWriter sw = new java.io.StringWriter();
+   java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+   ex.printStackTrace(pw);
+   pw.flush();
+   return sw.toString();
+}
+
+void femicHeadlessTrace(String message) {
+   String line = "[FEMIC headless] " + message;
+   print(line);
+   if (femicHeadlessTraceLogPath == null || femicHeadlessTraceLogPath.trim().length() == 0)
+      return;
+
+   java.io.PrintWriter writer = null;
+   try {
+      java.io.File traceFile = new java.io.File(femicHeadlessTraceLogPath);
+      java.io.File parent = traceFile.getParentFile();
+      if (parent != null)
+         parent.mkdirs();
+      writer = new java.io.PrintWriter(new java.io.FileWriter(traceFile, true));
+      writer.println(line);
+      writer.flush();
+   } catch (Throwable ex) {
+      print("[FEMIC headless] trace write failed: " + ex);
+   } finally {
+      if (writer != null)
+         writer.close();
+   }
+}
+
+boolean femicConfigureHeadlessFromArgs() {
+   if (args == void || args.length < 2)
+      return false;
+
+   if (!"__femic_headless__".equals(args[1]))
+      return false;
+
+   femicHeadlessMode = true;
+
+   if (args.length >= 3 && args[2] != null && args[2].trim().length() > 0)
+      femicHeadlessStageLabel = args[2].trim();
+
+   if (args.length >= 4 && args[3] != null && args[3].trim().length() > 0)
+      femicHeadlessIterations = Integer.parseInt(args[3].trim());
+
+   if (args.length >= 5 && args[4] != null && args[4].trim().length() > 0)
+      femicHeadlessImprovement = Double.parseDouble(args[4].trim());
+
+   if (args.length >= 6 && args[5] != null && args[5].trim().length() > 0)
+      femicHeadlessTraceLogPath = args[5].trim();
+
+   if (args.length >= 7 && args[6] != null && args[6].trim().length() > 0)
+      femicHeadlessScenarioMode = args[6].trim();
+
+   if (args.length >= 8 && args[7] != null && args[7].trim().length() > 0)
+      femicHeadlessScenarioTargetLabel = args[7].trim();
+
+   if (args.length >= 9 && args[8] != null && args[8].trim().length() > 0)
+      femicHeadlessScenarioMinAnnual = new Double(Double.parseDouble(args[8].trim()));
+
+   femicHeadlessTrace("mode enabled: stage="
+                      + femicHeadlessStageLabel
+                      + " iterations="
+                      + femicHeadlessIterations
+                      + " improvement="
+                      + femicHeadlessImprovement
+                      + " scenario_mode="
+                      + femicHeadlessScenarioMode
+                      + " scenario_target="
+                      + femicHeadlessScenarioTargetLabel
+                      + " scenario_min_annual="
+                      + femicHeadlessScenarioMinAnnual
+                      + " trace="
+                      + femicHeadlessTraceLogPath);
+   return true;
+}
+
+void femicConfigureHeadlessScenario() {
+   String mode = femicHeadlessScenarioMode == null ? "none" : femicHeadlessScenarioMode.trim();
+   if (mode.length() == 0 || "none".equalsIgnoreCase(mode)) {
+      femicHeadlessTrace("no headless scenario mode requested");
+      return;
+   }
+
+   if ("max-even-flow-smoke".equalsIgnoreCase(mode)) {
+      String targetLabel = femicHeadlessScenarioTargetLabel;
+      if (targetLabel == null || targetLabel.trim().length() == 0)
+         targetLabel = "product.Yield.managed.Total";
+
+      double minAnnual = 1000.0d;
+      if (femicHeadlessScenarioMinAnnual != null)
+         minAnnual = femicHeadlessScenarioMinAnnual.doubleValue();
+
+      Target target = control.getTarget(targetLabel);
+      if (target == null)
+         throw new IllegalStateException("Missing headless scenario target: " + targetLabel);
+
+      femicHeadlessTrace("validated max-even-flow smoke target="
+                         + targetLabel
+                         + " minAnnual="
+                         + minAnnual);
+      return;
+   }
+
+      throw new IllegalStateException("Unsupported FEMIC headless scenario mode: " + mode);
+}
+
+void femicConfigureHeadlessBaseHarvestTarget(String targetLabel, double minAnnual) {
+   Target target = control.getTarget(targetLabel);
+   if (target == null)
+      throw new IllegalStateException("Missing headless scenario target: " + targetLabel);
+
+   target.setActive(true);
+   target.setMinActive(true);
+   target.setMaxActive(true);
+   target.setLinear(true);
+
+   target.setMaximum(200000f, 0);
+   for (int i = 1; i < Horizon.periods; i++) {
+      target.setMinimum((float)(minAnnual * Horizon.intervals[i]), i);
+      target.setMaximum(200000f, i);
+   }
+}
+
+void femicConfigureHeadlessEvenFlowTarget(String targetLabel) {
+   Target target = control.getTarget(targetLabel);
+   if (target == null)
+      throw new IllegalStateException("Missing headless scenario target: " + targetLabel);
+
+   target.setActive(true);
+   target.setMinActive(true);
+   target.setMaxActive(true);
+
+   for (int i = 0; i < Horizon.periods; i++) {
+      target.setMinimum(0f, i);
+      target.setMaximum(0f, i);
+      target.setMinWeight(100f, i);
+      target.setMaxWeight(100f, i);
+   }
+}
+
+void femicWaitHeadlessIterations(int waitCount) {
+   if (waitCount <= 0) {
+      femicHeadlessTrace("wait count <= 0; skipping scheduler wait");
+      return;
+   }
+
+   if (femicHeadlessImprovement > 0.0d)
+      femicHeadlessTrace("waiting for progress: attempts="
+                         + waitCount
+                         + " improvement="
+                         + femicHeadlessImprovement);
+   else
+      femicHeadlessTrace("waiting for iterations: attempts=" + waitCount);
+
+   if (femicHeadlessImprovement > 0.0d)
+      control.waitForProgress(waitCount, femicHeadlessImprovement);
+   else
+      control.waitForIterations(waitCount);
+
+   femicHeadlessTrace("wait completed; isSuspended=" + control.isSuspended());
+}
+
+void femicRunHeadlessStage() {
+   try {
+      femicHeadlessTrace("run stage entered; isSuspended=" + control.isSuspended());
+      femicConfigureHeadlessScenario();
+
+      if ("max-even-flow-smoke".equalsIgnoreCase(femicHeadlessScenarioMode)) {
+         String requestedTargetLabel = femicHeadlessScenarioTargetLabel;
+         if (requestedTargetLabel == null || requestedTargetLabel.trim().length() == 0)
+            requestedTargetLabel = "product.Yield.managed.Total";
+
+         String baseTargetLabel = requestedTargetLabel;
+         if (requestedTargetLabel.startsWith("flow.even."))
+            baseTargetLabel = requestedTargetLabel.substring("flow.even.".length());
+
+         String flowTargetLabel = "flow.even." + baseTargetLabel;
+         double minAnnual = 1000.0d;
+         if (femicHeadlessScenarioMinAnnual != null)
+            minAnnual = femicHeadlessScenarioMinAnnual.doubleValue();
+
+         femicConfigureHeadlessBaseHarvestTarget(baseTargetLabel, minAnnual);
+         femicHeadlessTrace("seeded underlying harvest target="
+                            + baseTargetLabel
+                            + " minAnnual="
+                            + minAnnual
+                            + " linear=true max=200000");
+
+         int seedIterations = femicHeadlessIterations;
+         int flowIterations = 0;
+         if (control.getTarget(flowTargetLabel) != null && femicHeadlessIterations > 1) {
+            seedIterations = Math.max(1, femicHeadlessIterations / 2);
+            flowIterations = femicHeadlessIterations - seedIterations;
+         }
+
+         femicHeadlessTrace("delegating scheduler start to waitFor*; initial isSuspended="
+                            + control.isSuspended());
+         femicWaitHeadlessIterations(seedIterations);
+
+         if (flowIterations > 0) {
+            if (!control.isSuspended()) {
+               femicHeadlessTrace("issuing suspend between seed and flow phases");
+               control.suspend();
+            }
+
+            femicConfigureHeadlessEvenFlowTarget(flowTargetLabel);
+            femicHeadlessTrace("activated even-flow companion target="
+                               + flowTargetLabel
+                               + " target=0 weight=100"
+                               + " after seed phase");
+            femicHeadlessTrace("delegating scheduler restart to waitFor* after seed phase; initial isSuspended="
+                               + control.isSuspended());
+            femicWaitHeadlessIterations(flowIterations);
+         }
+      } else if (femicHeadlessIterations > 0) {
+         femicHeadlessTrace("delegating scheduler start to waitFor*; initial isSuspended="
+                            + control.isSuspended());
+         femicWaitHeadlessIterations(femicHeadlessIterations);
+      } else {
+         femicHeadlessTrace("iterations <= 0; skipping scheduler wait");
+      }
+   } finally {
+      if (!control.isSuspended()) {
+         femicHeadlessTrace("issuing suspend after wait");
+         control.suspend();
+      } else {
+         femicHeadlessTrace("scheduler already suspended before cleanup");
+      }
+   }
+
+   femicHeadlessTrace("saving stage " + femicHeadlessStageLabel);
+   reportWriter.saveStage(femicHeadlessStageLabel);
+   femicHeadlessTrace("saveStage completed");
+}
+
+void femicQueueHeadlessStage() {
+   if (!femicHeadlessMode)
+      return;
+
+   Runnable worker = new Runnable() {
+      public void run() {
+         try {
+            femicHeadlessTrace("worker thread started");
+            femicHeadlessTrace("waiting until initialized");
+            control.waitUntilInitialized();
+            femicHeadlessTrace("waitUntilInitialized completed");
+            femicRunHeadlessStage();
+         } catch (InterruptedException ex) {
+            femicHeadlessTrace("stage interrupted: " + ex);
+         } catch (Throwable ex) {
+            femicHeadlessTrace("stage failed: " + ex);
+            femicHeadlessTrace(femicThrowableToString(ex));
+            ex.printStackTrace();
+         }
+      }
+   };
+
+   Thread headlessThread = new Thread(worker, "femic-headless-stage");
+   headlessThread.setDaemon(false);
+    femicHeadlessTrace("starting worker thread");
+   headlessThread.start();
+}
