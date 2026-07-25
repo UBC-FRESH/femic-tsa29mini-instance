@@ -1,0 +1,10 @@
+{
+  "model_name": "tsa29mini",
+  "base_year": 2026,
+  "horizon": 30,
+  "period_length": 10,
+  "max_age": 300,
+  "n_curves": 150,
+  "n_development_types": 72,
+  "total_area_ha": 90499.79784183377
+}
