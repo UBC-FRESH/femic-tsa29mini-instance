@@ -1,0 +1,42 @@
+{
+  "run_id": "tsa29mini_replant_20260827",
+  "created_utc": "2026-08-27T01:13:00Z",
+  "purpose": "Species-switching replant yield curves (fresh-fuchs phase P6, issue UBC-FRESH/fresh-fuchs#48): pure-plantation BTC curves for replanting each tsa29mini source AU with PL / SW (canonical SX) / FD.",
+  "input": {
+    "path": "data/03_input-tsa29mini-replant.csv",
+    "sha256": "40e551ea578eed9ee85ddafd9c0f49edd98eb6693b816a16d4ef090823c4a258",
+    "rows": 63,
+    "generator": "build_replant_tipsy_input.py (this repo, root)",
+    "option_manifest": "data/tipsy_replant_manifest-tsa29mini.csv",
+    "si_source": "parent tsa29 instance data/03_input-tsa29.csv rows keyed by au_table.source_managed_local_au_id; source-AU reference SI flat-transferred to the target species column (documented simplification)"
+  },
+  "runtime": {
+    "host": "linux (jupyterhub), wine host_mode",
+    "wine": "wine-9.0 (Ubuntu 9.0~repack-4build3), /usr/bin/wine",
+    "wine_mono": "wine-mono-9.0.0-x86.msi installed into scratch wineprefix (TIPSYbtc.exe is a 64-bit .NET assembly; Mono required)",
+    "wineprefix": "tipsy_io/scratch/wineprefix (scratch, not tracked)",
+    "display": "userspace Xvfb (dpkg-extracted xvfb 21.1.12 + x11-xkb-utils + xkb-data; Xvfb binary string-patched: /usr/bin->/tmp/xkb, /usr/share/X11/xkb->/tmp/xkb/share/xkb, /var/lib/xkb/->/tmp/xkb/out/); DISPLAY=:99, -screen 0 1024x768x16",
+    "btc_install": "tipsy_io/scratch/btc_install (copied from prior UBC-FRESH integration evidence staging; includes TimberSupply.rpt report template)",
+    "command": "wine btc_install/TIPSYbtc.exe /TSR 03_input-tsa29mini-replant.csv 04_output-tsa29mini-replant.csv 04_error-tsa29mini-replant.csv (cwd = tipsy_io/scratch/work, cwd-relative paths)",
+    "duration_sec": 10,
+    "exit_code": 0
+  },
+  "outputs": {
+    "output_csv": "data/04_output-tsa29mini-replant.csv",
+    "error_csv": "data/04_error-tsa29mini-replant.csv (0 error rows)",
+    "curves_csv": "data/tipsy_curves_tsa29mini_replant.csv (femic parse_btc_tsr_transposed_output long format: AU, Age, Yield, Height, DBHq, TPH, GrossYield, CrownCover)"
+  },
+  "validation": {
+    "coverage": "63/63 feature_ids x 36 ages (0..350)",
+    "error_rows": 0,
+    "si_ordering": "L <= M <= H holds for PL and FD in all strata; SW shows M>H max-yield inversions in SBPS_PLI, SBPS_SX, IDF_PLI that exactly replicate the parent tsa29 native SW curves (bit-identical for SBPS_SX L/M/H, max|diff|=0.0) — inherited TIPSY behaviour, not a transfer artifact",
+    "monotonicity": "net merchantable yield declines slightly post-culmination on some PL curves (max 1.7 m3/ha per 10-yr step) — expected TIPSY mortality behaviour, not cumulative volume",
+    "identity_check": "replant SW curves for SBPS_SX L/M/H are bit-identical to parent tsa29 curves 21010/22010/23010 (same species, SI, and regime)"
+  },
+  "known_limitations": [
+    "Flat SI transfer: target species grows at the source AU's reference SI (no species-specific site-index conversion equations applied)",
+    "Provisional TIPSY config lineage (codex-provisional; final calibration should be RESULTS/SPAR opening-level)",
+    "Species mixes not yet generated (descoped from this pass; pure options only)",
+    "No OT (other) TIPSY representation; OT replant keeps the synthetic/proxy path in fresh-fuchs"
+  ]
+}
